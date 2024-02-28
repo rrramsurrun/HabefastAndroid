@@ -19,6 +19,7 @@ abstract class HabefastDatabase : RoomDatabase() {
 
     abstract fun exerciseTemplateDao(): ExerciseTemplateDao
     abstract fun exerciseDao(): ExerciseDao
+    abstract fun exerciseDetailsDao():ExerciseDetailsDao
     //Ensure only one instance running
 abstract fun exerciseSetDao():ExerciseSetDao
     companion object {

@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 interface Workout {
-    val id: Int
+    val id: Int?
     val name: String
     //val exercises: List<Exercises>
 }
@@ -14,7 +14,7 @@ interface Workout {
 @Entity(tableName = "workout")
 data class CompletedWorkout(
     @PrimaryKey(autoGenerate = true)
-    override val id: Int = 0,
+    override val id: Int? = 0,
     override val name: String,
     val durationMinutes: Int,
     val startTime: String

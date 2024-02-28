@@ -19,6 +19,7 @@ import com.ramsurrun.habefast.data.ExerciseTemplate
 import com.ramsurrun.habefast.data.ExerciseTemplateDao
 import com.ramsurrun.habefast.data.ExerciseType
 import com.ramsurrun.habefast.data.HabefastDatabase
+import com.ramsurrun.habefast.data.WorkoutRepositoryImpl
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -36,7 +37,7 @@ import java.io.IOException
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class CompletedWorkoutDetailsDaoTest {
+class CompletedWorkoutDetailsRepoTest {
     private lateinit var habefastDatabase: HabefastDatabase
     private lateinit var completedWorkoutDao: CompletedWorkoutDao
     private lateinit var exerciseTemplateDao: ExerciseTemplateDao
@@ -44,6 +45,7 @@ class CompletedWorkoutDetailsDaoTest {
     private lateinit var exerciseSetDao: ExerciseSetDao
     private lateinit var exerciseDetailsDao: ExerciseDetailsDao
     private lateinit var completedWorkoutDetailsDao: CompletedWorkoutDetailsDao
+    private lateinit var workoutRepositoryImpl: WorkoutRepositoryImpl
 
     private val completedWorkout1 = CompletedWorkout(1, "First workout", 69, "2023-09-01T10:15:30")
     private val exerciseTemplate1 =
@@ -51,8 +53,13 @@ class CompletedWorkoutDetailsDaoTest {
     private val exercise1 =
         Exercise(id = 1, workoutId = 1, exerciseTemplateId = 1, workoutTemplateId = null)
     private val exerciseSet1 = ExerciseSet(1, 1,50.00,10,null,null)
-    private val exerciseDetails1 = ExerciseDetails(exercise1, listOf(exerciseSet1))
+    private val exerciseSet2 = ExerciseSet(2, 1,55.00,10,null,null)
+    private val exerciseSet3 = ExerciseSet(3, 1,60.00,10,null,null)
+    private val exerciseDetails1 = ExerciseDetails(exercise1, listOf(exerciseSet1,exerciseSet2,exerciseSet3))
     private val completedWorkoutDetails1 = CompletedWorkoutDetails(completedWorkout1,listOf(exerciseDetails1))
+    private val exerciseDetails1modified = ExerciseDetails(exercise1, listOf(exerciseSet1,exerciseSet2))
+    private val completedWorkoutDetails1modified = CompletedWorkoutDetails(completedWorkout1,listOf(exerciseDetails1modified))
+
 
     @Before
     fun createDbForTest() {
@@ -67,6 +74,7 @@ class CompletedWorkoutDetailsDaoTest {
         exerciseSetDao = habefastDatabase.exerciseSetDao()
         exerciseDetailsDao = habefastDatabase.exerciseDetailsDao()
         completedWorkoutDetailsDao = habefastDatabase.completedWorkoutDetailsDao()
+        workoutRepositoryImpl = WorkoutRepositoryImpl(completedWorkoutDao,exerciseTemplateDao,exerciseDao,exerciseSetDao,exerciseDetailsDao,completedWorkoutDetailsDao)
     }
 
     @After
@@ -78,67 +86,56 @@ class CompletedWorkoutDetailsDaoTest {
 
     @Test
     @Throws(Exception::class)
-    fun daoInsert_CompleteWorkout() = runBlocking {
-        completedWorkoutDao.insert(completedWorkout1)
-        val allWorkouts = completedWorkoutDao.getAllCompletedWorkouts().first()
-        assertEquals(allWorkouts[0], completedWorkout1)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun daoInsert_ExerciseTemplate() = runBlocking {
-        exerciseTemplateDao.insert(exerciseTemplate1)
-        val allExerciseTemplates = exerciseTemplateDao.getAllExerciseTemplates().first()
-        assertEquals(allExerciseTemplates[0], exerciseTemplate1)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun daoInsert_Exercise() = runBlocking {
-        completedWorkoutDao.insert(completedWorkout1)
-        exerciseTemplateDao.insert(exerciseTemplate1)
-        exerciseDao.insert(exercise1)
-        val allExercises = exerciseDao.getAllExercises().first()
-        assertEquals(allExercises[0], exercise1)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun daoInsert_ExerciseSet() = runBlocking {
+    fun daoGet_CompleteWorkoutDetails() = runBlocking {
         completedWorkoutDao.insert(completedWorkout1)
         exerciseTemplateDao.insert(exerciseTemplate1)
         exerciseDao.insert(exercise1)
         exerciseSetDao.insert(exerciseSet1)
-        val allExerciseSets = exerciseSetDao.getAllExerciseSets().first()
-        assertEquals(allExerciseSets[0], exerciseSet1)
-    }
-    @Test
-    @Throws(Exception::class)
-    fun daoGet_ExerciseDetails() = runBlocking {
-        completedWorkoutDao.insert(completedWorkout1)
-        exerciseTemplateDao.insert(exerciseTemplate1)
-        exerciseDao.insert(exercise1)
-        exerciseSetDao.insert(exerciseSet1)
-        val allExerciseDetails = exerciseDetailsDao.getAllExerciseDetails().first()
-        assertEquals(allExerciseDetails[0], exerciseDetails1)
-    }
-    @Test
-    @Throws(Exception::class)
-    fun daoGet_WorkoutDetails() = runBlocking {
-        completedWorkoutDao.insert(completedWorkout1)
-        exerciseTemplateDao.insert(exerciseTemplate1)
-        exerciseDao.insert(exercise1)
-        exerciseSetDao.insert(exerciseSet1)
-        val allWorkoutDetails = completedWorkoutDetailsDao.getAllCompletedWorkoutDetails().first()
+        exerciseSetDao.insert(exerciseSet2)
+        exerciseSetDao.insert(exerciseSet3)
+        val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
         assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
     }
+    @Test
+    @Throws(Exception::class)
+    fun daoInsert_CompleteWorkoutDetails() = runBlocking {
+        exerciseTemplateDao.insert(exerciseTemplate1)
+        workoutRepositoryImpl.insertWorkout(completedWorkoutDetails1)
+        val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
+        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
+    }
+    @Test
+    @Throws(Exception::class)
+    fun daoDelete_CompleteWorkoutDetails() = runBlocking {
+        exerciseTemplateDao.insert(exerciseTemplate1)
+        workoutRepositoryImpl.insertWorkout(completedWorkoutDetails1)
+        val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
+        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
+        workoutRepositoryImpl.deleteWorkout(completedWorkoutDetails1)
+        val emptyWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
+        assertEmpty<CompletedWorkoutDetails>(emptyWorkoutDetails)
+        val allExercises = exerciseDao.getAllExercises().first()
+        assertEmpty<Exercise>(allExercises)
+        val allExerciseSets = exerciseSetDao.getAllExerciseSets().first()
+        assertEmpty<ExerciseSet>(allExerciseSets)
+    }
 
-//    @Test
-//    @Throws(Exception::class)
-//    fun daoInsert_WorkoutDetails() = runBlocking {
-//        completedWorkoutDetailsDao.insert(completedWorkoutDetails1)
-//        val allWorkoutDetails = completedWorkoutDetailsDao.getAllCompletedWorkoutDetails().first()
-//        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
-//    }
+    private fun <T> assertEmpty(list:List<T>){
+        assertEquals(list,listOf<T>())
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun daoUpdate_CompleteWorkoutDetails() = runBlocking {
+        exerciseTemplateDao.insert(exerciseTemplate1)
+        workoutRepositoryImpl.insertWorkout(completedWorkoutDetails1)
+        val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
+        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
+
+        workoutRepositoryImpl.updateWorkout(completedWorkoutDetails1modified)
+        val modifiedWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
+        assertEquals(modifiedWorkoutDetails[0], completedWorkoutDetails1modified)
+    }
+
 
 }
