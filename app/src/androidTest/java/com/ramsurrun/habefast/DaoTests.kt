@@ -45,12 +45,12 @@ class CompletedWorkoutDetailsDaoTest {
     private lateinit var exerciseDetailsDao: ExerciseDetailsDao
     private lateinit var completedWorkoutDetailsDao: CompletedWorkoutDetailsDao
 
-    private val completedWorkout1 = CompletedWorkout(1, "First workout", 69, "2023-09-01T10:15:30")
+    private val completedWorkout1 = CompletedWorkout( "First workout", 69, "2023-09-01T10:15:30")
     private val exerciseTemplate1 =
-        ExerciseTemplate(1, "Bench Press", ExerciseType.REPS, BodyPart.CHEST)
+        ExerciseTemplate( "Bench Press", ExerciseType.REPS, BodyPart.CHEST)
     private val exercise1 =
-        Exercise(id = 1, workoutId = 1, exerciseTemplateId = 1, workoutTemplateId = null)
-    private val exerciseSet1 = ExerciseSet(1, 1,50.00,10,null,null)
+        Exercise(workoutId = 1, exerciseTemplateId = 1, workoutTemplateId = null)
+    private val exerciseSet1 = ExerciseSet(1,50.00,10,null,null)
     private val exerciseDetails1 = ExerciseDetails(exercise1, listOf(exerciseSet1))
     private val completedWorkoutDetails1 = CompletedWorkoutDetails(completedWorkout1,listOf(exerciseDetails1))
 
@@ -81,7 +81,7 @@ class CompletedWorkoutDetailsDaoTest {
     fun daoInsert_CompleteWorkout() = runBlocking {
         completedWorkoutDao.insert(completedWorkout1)
         val allWorkouts = completedWorkoutDao.getAllCompletedWorkouts().first()
-        assertEquals(allWorkouts[0], completedWorkout1)
+        assertEquals(completedWorkout1,allWorkouts[0])
     }
 
     @Test
@@ -89,7 +89,7 @@ class CompletedWorkoutDetailsDaoTest {
     fun daoInsert_ExerciseTemplate() = runBlocking {
         exerciseTemplateDao.insert(exerciseTemplate1)
         val allExerciseTemplates = exerciseTemplateDao.getAllExerciseTemplates().first()
-        assertEquals(allExerciseTemplates[0], exerciseTemplate1)
+        assertEquals(exerciseTemplate1,allExerciseTemplates[0])
     }
 
     @Test
@@ -99,7 +99,7 @@ class CompletedWorkoutDetailsDaoTest {
         exerciseTemplateDao.insert(exerciseTemplate1)
         exerciseDao.insert(exercise1)
         val allExercises = exerciseDao.getAllExercises().first()
-        assertEquals(allExercises[0], exercise1)
+        assertEquals(exercise1,allExercises[0])
     }
 
     @Test
@@ -110,7 +110,7 @@ class CompletedWorkoutDetailsDaoTest {
         exerciseDao.insert(exercise1)
         exerciseSetDao.insert(exerciseSet1)
         val allExerciseSets = exerciseSetDao.getAllExerciseSets().first()
-        assertEquals(allExerciseSets[0], exerciseSet1)
+        assertEquals(exerciseSet1,allExerciseSets[0])
     }
     @Test
     @Throws(Exception::class)
@@ -120,7 +120,7 @@ class CompletedWorkoutDetailsDaoTest {
         exerciseDao.insert(exercise1)
         exerciseSetDao.insert(exerciseSet1)
         val allExerciseDetails = exerciseDetailsDao.getAllExerciseDetails().first()
-        assertEquals(allExerciseDetails[0], exerciseDetails1)
+        assertEquals(exerciseDetails1,allExerciseDetails[0])
     }
     @Test
     @Throws(Exception::class)
@@ -130,7 +130,7 @@ class CompletedWorkoutDetailsDaoTest {
         exerciseDao.insert(exercise1)
         exerciseSetDao.insert(exerciseSet1)
         val allWorkoutDetails = completedWorkoutDetailsDao.getAllCompletedWorkoutDetails().first()
-        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
+        assertEquals(completedWorkoutDetails1,allWorkoutDetails[0])
     }
 
 //    @Test

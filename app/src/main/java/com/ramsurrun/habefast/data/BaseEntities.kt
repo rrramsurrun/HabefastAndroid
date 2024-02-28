@@ -5,36 +5,34 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-interface Workout {
-    val id: Int?
-    val name: String
-    //val exercises: List<Exercises>
-}
-
 @Entity(tableName = "workout")
 data class CompletedWorkout(
-    @PrimaryKey(autoGenerate = true)
-    override val id: Int? = 0,
-    override val name: String,
+
+    val name: String,
     val durationMinutes: Int,
     val startTime: String
-) : Workout
+) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+}
 
 @Entity(tableName = "workoutTemplate")
 data class TemplateWorkout(
+     val name: String,
+){
     @PrimaryKey(autoGenerate = true)
-    override val id: Int = 0,
-    override val name: String,
-) : Workout
+    var id: Int = 0
+}
 
 @Entity(tableName = "exerciseTemplate")
 data class ExerciseTemplate(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
     val name: String,
     val exerciseType: ExerciseType,
     val bodyPart: BodyPart
-)
+){
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+}
 
 enum class BodyPart {
     CHEST, BACK, QUADS, HAMSTRINGS, GLUTES
@@ -67,12 +65,13 @@ enum class ExerciseType {
         )]
 )
 data class Exercise(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
     val workoutId: Int?,
     val workoutTemplateId: Int?,
     val exerciseTemplateId: Int
-)
+){
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+}
 
 @Entity(
     tableName = "exerciseNote", indices = [Index(value = ["exerciseId"])], foreignKeys = [
@@ -82,12 +81,13 @@ data class Exercise(
         )]
 )
 data class ExerciseNote(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
     val exerciseId: Int,
     val sortOrder: Int,
     val note: String
-)
+){
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+}
 
 @Entity(
     tableName = "exerciseSet", indices = [Index(value = ["exerciseId"])], foreignKeys = [
@@ -99,12 +99,13 @@ data class ExerciseNote(
         )]
 )
 data class ExerciseSet(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
     val exerciseId: Int,
     val weightKg: Double?,
     val reps: Int?,
     val durationSeconds: Int?,
     val distanceKm: Double?
-)
+){
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+}
 

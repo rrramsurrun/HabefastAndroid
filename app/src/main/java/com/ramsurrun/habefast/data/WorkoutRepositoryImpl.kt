@@ -23,7 +23,7 @@ class WorkoutRepositoryImpl(
 
     override suspend fun deleteWorkout(workout: CompletedWorkoutDetails) {
         //Delete the workout
-        completedWorkoutDao.delete(workout.completedWorkout)
+        completedWorkoutDao.delete(workout.completedWorkout.id)
     }
 
     override suspend fun updateWorkout(workout: CompletedWorkoutDetails) {

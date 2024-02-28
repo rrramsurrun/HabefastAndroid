@@ -26,8 +26,8 @@ interface CompletedWorkoutDao {
     @Update
     suspend fun update(item: CompletedWorkout)
 
-    @Delete
-    suspend fun delete(item: CompletedWorkout)
+    @Query("DELETE FROM workout WHERE id=:id")
+    suspend fun delete(id: Int)
 }
 @Dao
 interface ExerciseTemplateDao {

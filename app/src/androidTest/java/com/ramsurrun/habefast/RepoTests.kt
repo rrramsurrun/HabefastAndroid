@@ -47,18 +47,17 @@ class CompletedWorkoutDetailsRepoTest {
     private lateinit var completedWorkoutDetailsDao: CompletedWorkoutDetailsDao
     private lateinit var workoutRepositoryImpl: WorkoutRepositoryImpl
 
-    private val completedWorkout1 = CompletedWorkout(1, "First workout", 69, "2023-09-01T10:15:30")
+    private val completedWorkout1 = CompletedWorkout( "First workout", 69, "2023-09-01T10:15:30")
     private val exerciseTemplate1 =
-        ExerciseTemplate(1, "Bench Press", ExerciseType.REPS, BodyPart.CHEST)
+        ExerciseTemplate( "Bench Press", ExerciseType.REPS, BodyPart.CHEST)
     private val exercise1 =
-        Exercise(id = 1, workoutId = 1, exerciseTemplateId = 1, workoutTemplateId = null)
-    private val exerciseSet1 = ExerciseSet(1, 1,50.00,10,null,null)
-    private val exerciseSet2 = ExerciseSet(2, 1,55.00,10,null,null)
-    private val exerciseSet3 = ExerciseSet(3, 1,60.00,10,null,null)
-    private val exerciseDetails1 = ExerciseDetails(exercise1, listOf(exerciseSet1,exerciseSet2,exerciseSet3))
+        Exercise(workoutId = 1, exerciseTemplateId = 1, workoutTemplateId = null)
+    private val exerciseSet1 = ExerciseSet( 1,50.00,10,null,null)
+    private val exerciseSet2 = ExerciseSet( 1,55.00,10,null,null)
+    private val exerciseSet3 = ExerciseSet( 1,60.00,10,null,null)
+    private val exerciseDetails1 = ExerciseDetails(exercise1, listOf(exerciseSet1,exerciseSet2))
     private val completedWorkoutDetails1 = CompletedWorkoutDetails(completedWorkout1,listOf(exerciseDetails1))
-    private val exerciseDetails1modified = ExerciseDetails(exercise1, listOf(exerciseSet1,exerciseSet2))
-    private val completedWorkoutDetails1modified = CompletedWorkoutDetails(completedWorkout1,listOf(exerciseDetails1modified))
+
 
 
     @Before
@@ -92,9 +91,8 @@ class CompletedWorkoutDetailsRepoTest {
         exerciseDao.insert(exercise1)
         exerciseSetDao.insert(exerciseSet1)
         exerciseSetDao.insert(exerciseSet2)
-        exerciseSetDao.insert(exerciseSet3)
         val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
-        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
+        assertEquals(completedWorkoutDetails1,allWorkoutDetails[0])
     }
     @Test
     @Throws(Exception::class)
@@ -102,7 +100,7 @@ class CompletedWorkoutDetailsRepoTest {
         exerciseTemplateDao.insert(exerciseTemplate1)
         workoutRepositoryImpl.insertWorkout(completedWorkoutDetails1)
         val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
-        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
+        assertEquals(completedWorkoutDetails1,allWorkoutDetails[0])
     }
     @Test
     @Throws(Exception::class)
@@ -110,8 +108,8 @@ class CompletedWorkoutDetailsRepoTest {
         exerciseTemplateDao.insert(exerciseTemplate1)
         workoutRepositoryImpl.insertWorkout(completedWorkoutDetails1)
         val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
-        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
-        workoutRepositoryImpl.deleteWorkout(completedWorkoutDetails1)
+        assertEquals(completedWorkoutDetails1,allWorkoutDetails[0])
+        workoutRepositoryImpl.deleteWorkout(allWorkoutDetails[0])
         val emptyWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
         assertEmpty<CompletedWorkoutDetails>(emptyWorkoutDetails)
         val allExercises = exerciseDao.getAllExercises().first()
@@ -121,20 +119,24 @@ class CompletedWorkoutDetailsRepoTest {
     }
 
     private fun <T> assertEmpty(list:List<T>){
-        assertEquals(list,listOf<T>())
+        assertEquals(listOf<T>(),list)
     }
 
     @Test
     @Throws(Exception::class)
     fun daoUpdate_CompleteWorkoutDetails() = runBlocking {
+        //Add workout
         exerciseTemplateDao.insert(exerciseTemplate1)
         workoutRepositoryImpl.insertWorkout(completedWorkoutDetails1)
         val allWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
-        assertEquals(allWorkoutDetails[0], completedWorkoutDetails1)
+        assertEquals(completedWorkoutDetails1,allWorkoutDetails[0])
 
-        workoutRepositoryImpl.updateWorkout(completedWorkoutDetails1modified)
+        //Modify and update workout
+        var workoutModified:CompletedWorkoutDetails = allWorkoutDetails[0]
+        workoutModified.exercises.get(0).exerciseSets.plus(exerciseSet3)
+        workoutRepositoryImpl.updateWorkout(workoutModified)
         val modifiedWorkoutDetails = workoutRepositoryImpl.getAllWorkoutsStream().first()
-        assertEquals(modifiedWorkoutDetails[0], completedWorkoutDetails1modified)
+        assertEquals(workoutModified,modifiedWorkoutDetails[0])
     }
 
 
